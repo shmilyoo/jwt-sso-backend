@@ -1,0 +1,20 @@
+2018-08-29 11:03:57,101 INFO 11352 应用启动，进程id： 11352
+2018-08-29 11:03:57,154 INFO 11352 开始同步数据库表
+2018-08-29 11:03:57,193 INFO 11352 [egg-sequelize][1ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:03:57,197 INFO 11352 [egg-sequelize][2ms] Executed (default): CREATE TABLE IF NOT EXISTS `users` (`username` VARCHAR(255) NOT NULL UNIQUE, `password` VARCHAR(255) NOT NULL, `name` VARCHAR(255) NOT NULL, `sex` INTEGER NOT NULL, `age` INTEGER NOT NULL, `test` VARCHAR(255) NOT NULL, `avatar` VARCHAR(255) NOT NULL, `lastSignInAt` DATETIME NOT NULL, `id` CHAR(36) BINARY , `createdAt` DATETIME NOT NULL, `updatedAt` DATETIME NOT NULL, `version` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE=InnoDB;
+2018-08-29 11:03:57,201 INFO 11352 [egg-sequelize][2ms] Executed (default): SHOW INDEX FROM `users` FROM `sso`
+2018-08-29 11:03:57,202 INFO 11352 同步数据库表完毕
+2018-08-29 11:07:10,690 INFO 12208 应用启动，进程id： 12208
+2018-08-29 11:07:10,736 INFO 12208 开始同步数据库表
+2018-08-29 11:07:10,774 INFO 12208 [egg-sequelize][1ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:07:10,776 INFO 12208 [egg-sequelize][1ms] Executed (default): CREATE TABLE IF NOT EXISTS `users` (`username` VARCHAR(255) NOT NULL UNIQUE, `password` VARCHAR(255) NOT NULL, `name` VARCHAR(255) NOT NULL, `sex` INTEGER NOT NULL, `age` INTEGER NOT NULL, `test` VARCHAR(255) NOT NULL, `avatar` VARCHAR(255) NOT NULL, `lastSignInAt` DATETIME NOT NULL, `id` CHAR(36) BINARY , `createdAt` DATETIME NOT NULL, `updatedAt` DATETIME NOT NULL, `version` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE=InnoDB;
+2018-08-29 11:07:10,779 INFO 12208 [egg-sequelize][2ms] Executed (default): SHOW INDEX FROM `users` FROM `sso`
+2018-08-29 11:07:10,780 INFO 12208 同步数据库表完毕
+2018-08-29 11:11:43,723 INFO 12322 应用启动，进程id： 12322
+2018-08-29 11:11:43,767 INFO 12322 开始同步数据库表
+2018-08-29 11:11:43,804 INFO 12322 [egg-sequelize][0ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:11:43,815 INFO 12322 [egg-sequelize][8ms] Executed (default): DROP TABLE IF EXISTS `users`;
+2018-08-29 11:11:43,818 INFO 12322 [egg-sequelize][1ms] Executed (default): DROP TABLE IF EXISTS `users`;
+2018-08-29 11:11:43,836 INFO 12322 [egg-sequelize][14ms] Executed (default): CREATE TABLE IF NOT EXISTS `users` (`username` VARCHAR(255) NOT NULL UNIQUE, `password` VARCHAR(255) NOT NULL, `name` VARCHAR(255) NOT NULL, `sex` INTEGER NOT NULL, `age` INTEGER NOT NULL, `test` VARCHAR(255) NOT NULL, `avatar` VARCHAR(255) NOT NULL, `lastSignInAt` DATETIME NOT NULL, `id` CHAR(36) BINARY , `createdAt` DATETIME NOT NULL, `updatedAt` DATETIME NOT NULL, `version` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (`id`)) ENGINE=InnoDB;
+2018-08-29 11:11:43,839 INFO 12322 [egg-sequelize][2ms] Executed (default): SHOW INDEX FROM `users` FROM `sso`
+2018-08-29 11:11:43,840 INFO 12322 同步数据库表完毕

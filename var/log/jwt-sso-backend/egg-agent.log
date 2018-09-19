@@ -1,0 +1,24 @@
+2018-08-29 11:03:56,459 INFO 11342 [egg-sequelize][1ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:03:56,227 INFO 11342 [egg:logger] init all loggers with options: {"dir":"var/log/jwt-sso-backend","encoding":"utf8","env":"local","level":"INFO","consoleLevel":"INFO","disableConsoleAfterReady":false,"outputJSON":false,"buffer":true,"appLogName":"jwt-sso-backend-web.log","coreLogName":"egg-web.log","agentLogName":"egg-agent.log","errorLogName":"common-error.log","coreLogger":{"consoleLevel":"WARN"},"allowDebugAtProd":false,"type":"agent"}
+2018-08-29 11:03:56,306 INFO 11342 [egg-redis] connecting redis://:null@127.0.0.1:6379/0
+2018-08-29 11:03:56,403 INFO 11342 [egg:core] dump config after load, 4ms
+2018-08-29 11:03:56,427 INFO 11342 [egg-watcher:agent] watcher start success
+2018-08-29 11:03:56,430 INFO 11342 [egg-redis] connect success on redis://:null@127.0.0.1:6379/0
+2018-08-29 11:03:56,436 INFO 11342 [egg-redis] instance[0] status OK, redis currentTime: #
+2018-08-29 11:03:56,464 INFO 11342 [egg:core] dump config after ready, 3ms
+2018-08-29 11:07:10,071 INFO 12198 [egg-sequelize][1ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:07:09,876 INFO 12198 [egg:logger] init all loggers with options: {"dir":"var/log/jwt-sso-backend","encoding":"utf8","env":"local","level":"INFO","consoleLevel":"INFO","disableConsoleAfterReady":false,"outputJSON":false,"buffer":true,"appLogName":"jwt-sso-backend-web.log","coreLogName":"egg-web.log","agentLogName":"egg-agent.log","errorLogName":"common-error.log","coreLogger":{"consoleLevel":"WARN"},"allowDebugAtProd":false,"type":"agent"}
+2018-08-29 11:07:09,932 INFO 12198 [egg-redis] connecting redis://:null@127.0.0.1:6379/0
+2018-08-29 11:07:10,014 INFO 12198 [egg:core] dump config after load, 4ms
+2018-08-29 11:07:10,040 INFO 12198 [egg-watcher:agent] watcher start success
+2018-08-29 11:07:10,044 INFO 12198 [egg-redis] connect success on redis://:null@127.0.0.1:6379/0
+2018-08-29 11:07:10,059 INFO 12198 [egg-redis] instance[0] status OK, redis currentTime: #
+2018-08-29 11:07:10,076 INFO 12198 [egg:core] dump config after ready, 3ms
+2018-08-29 11:11:43,100 INFO 12311 [egg-sequelize][1ms] Executed (default): SELECT 1+1 AS result
+2018-08-29 11:11:42,907 INFO 12311 [egg:logger] init all loggers with options: {"dir":"var/log/jwt-sso-backend","encoding":"utf8","env":"local","level":"INFO","consoleLevel":"INFO","disableConsoleAfterReady":false,"outputJSON":false,"buffer":true,"appLogName":"jwt-sso-backend-web.log","coreLogName":"egg-web.log","agentLogName":"egg-agent.log","errorLogName":"common-error.log","coreLogger":{"consoleLevel":"WARN"},"allowDebugAtProd":false,"type":"agent"}
+2018-08-29 11:11:42,969 INFO 12311 [egg-redis] connecting redis://:null@127.0.0.1:6379/0
+2018-08-29 11:11:43,050 INFO 12311 [egg:core] dump config after load, 3ms
+2018-08-29 11:11:43,069 INFO 12311 [egg-watcher:agent] watcher start success
+2018-08-29 11:11:43,073 INFO 12311 [egg-redis] connect success on redis://:null@127.0.0.1:6379/0
+2018-08-29 11:11:43,089 INFO 12311 [egg-redis] instance[0] status OK, redis currentTime: #
+2018-08-29 11:11:43,107 INFO 12311 [egg:core] dump config after ready, 5ms
