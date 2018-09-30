@@ -12,6 +12,13 @@ class HomeController extends Controller {
     this.ctx.logger.info(this.app.config.env);
     this.ctx.logger.info(process.pid);
   }
+  async test() {
+    const ctx = this.ctx;
+    const result = await ctx.model.Dept.destroy({
+      where: { id: 'c360d5f0ceef11e8b013f53754442dd4' },
+    });
+    ctx.body = ctx.helper.getRespBody(true, result);
+  }
 }
 
 module.exports = HomeController;

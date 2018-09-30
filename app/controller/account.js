@@ -41,18 +41,8 @@ class AccountController extends Controller {
   async login() {
     const ctx = this.ctx;
     const body = ctx.request.body;
-    let { username, password } = body;
-    username = username.toLowerCase();
-    password = await this.service.common.getCryptoPasswd(password, username);
-    const user = await ctx.model.User.findOne({
-      attributes: [ 'username', 'password', 'active' ],
-      where: { username, password },
-    });
-    await new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 2000);
-    });
+    const { username, password } = body;
+    const user = await ctx.service.account.checkUserPasswd(username, password);
     if (user) {
       const token = jwt.encode(
         { username, active: user.active },

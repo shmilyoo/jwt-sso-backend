@@ -35,8 +35,56 @@ exports.cors = {
 exports.onerror = {
   all(err, ctx) {
     ctx.body = { success: false, error: `服务端错误，${err.message}` };
-    ctx.status = 500;
+    ctx.status = 200;
   },
 };
 exports.jwtSecrect = 'qwert12345yuiop54321';
 exports.salt = 'dsioiwerfdsafsdkl#4343@kfd'; // 用户密码加盐 md5(md5-password+salt)
+
+const a = {
+  config: {
+    transformRequest: {},
+    transformResponse: {},
+    timeout: 3000,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    headers: {
+      Accept: 'application/json, text/plain, */*',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    withCredentials: true,
+    method: 'post',
+    url: 'http://localhost:7001/dept/add',
+    data: 'name=fsdfdsfds&symbol=fdsf&parentId=0',
+    baseURL: 'http://localhost:7001',
+  },
+  request: {},
+  response: {
+    data: {
+      success: false,
+      error: '服务端错误，notNull Violation: dept.intro cannot be null',
+    },
+    status: 302,
+    statusText: 'Found',
+    headers: { 'content-type': 'application/json; charset=utf-8' },
+    config: {
+      transformRequest: {},
+      transformResponse: {},
+      timeout: 3000,
+      xsrfCookieName: 'XSRF-TOKEN',
+      xsrfHeaderName: 'X-XSRF-TOKEN',
+      maxContentLength: -1,
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      withCredentials: true,
+      method: 'post',
+      url: 'http://localhost:7001/dept/add',
+      data: 'name=fsdfdsfds&symbol=fdsf&parentId=0',
+      baseURL: 'http://localhost:7001',
+    },
+    request: {},
+  },
+};

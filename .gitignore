@@ -12,3 +12,4 @@ run/
 *.un~
 database/
 .vscode/
+var/
