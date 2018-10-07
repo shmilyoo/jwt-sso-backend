@@ -42,7 +42,7 @@ module.exports = app => {
         password: 'aaaa',
         name: '张三',
         sex: 1,
-        birth: '1982-10-11',
+        birth: 12123443,
         active: 0,
         dept_id: 'c360d5f0ceef11e8b013f53754442dd4',
       });
@@ -51,7 +51,7 @@ module.exports = app => {
         password: 'bbbb',
         name: '李四',
         sex: 2,
-        birth: '1999-03-11',
+        birth: 2323232,
         active: 1,
         dept_id: 'c360d5f0ceef11e8b013f53754442dd4',
       });
@@ -60,10 +60,26 @@ module.exports = app => {
         password: 'cccc',
         name: '李峰',
         sex: 2,
-        birth: '1989-03-11',
+        birth: 4333433,
         active: 2,
         dept_id: 'c360d5f0ceef11e8b013f53754442dd4',
       });
+      const dddd = await app.model.User.create({
+        username: 'dddd',
+        password: 'bf535f977eab4e231277e6a24c1fc018',
+        name: 'dd滴滴',
+        nation: '汉族',
+        married: true,
+        sex: 2,
+        birth: 4333433,
+        id_card: 'card1',
+        id_card2: 'card2',
+        native_place: '安徽',
+        phone: '232343434',
+        active: 1,
+        dept_id: '0',
+      });
+
       app.logger.info('同步数据库表完毕');
       // const test = await app.model.Dept.findOne({
       //   where: { level: 1 },

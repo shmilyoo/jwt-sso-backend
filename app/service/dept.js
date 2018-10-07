@@ -176,7 +176,8 @@ class DeptService extends Service {
 
   /**
    * 获取节点以及父节点
-   * @param {string} id
+   * @param {string} id dept id
+   * @return {object} {id,name,...,parent:{}}
    */
   async getDeptWithParent(id) {
     // 如果使用raw:true 返回的是{id,name,...,parent.id,parent.name...}
@@ -190,8 +191,9 @@ class DeptService extends Service {
   }
 
   /**
-   * 获取节点以及所有祖先节点
-   * @param {string} id
+   * 获取节点以及所有祖先节点,按照level从小到大排列，最后一个是对应id的dept
+   * @param {string} id dept id
+   * @return {array} dept and ancestors order with level
    */
   async getDeptWithAncestor(id) {
     const Dept = this.ctx.model.Dept;
@@ -214,13 +216,14 @@ class DeptService extends Service {
 
   /**
    * 获取节点以及一级子节点
-   * @param {string} id
+   * @param {string} id dept id
    */
   async getDeptWithChildren(id) {}
 
   /**
-   * 获取节点以及所有后代节点
-   * @param {string} id
+   * 获取节点以及所有后代节点order with level and order
+   * @param {string} id dept id
+   * @return {array} dept and Offspring order with level and order
    */
   async getDeptWithOffspring(id) {
     const Dept = this.ctx.model.Dept;
