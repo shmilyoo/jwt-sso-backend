@@ -32,11 +32,11 @@ module.exports = app => {
       targetKey: 'id',
       constraints: false,
     });
-    Dept.hasMany(app.model.User, {
-      as: 'crew',
-      foreignKey: 'dept_id',
-      constraints: false,
-    });
+    // Dept.hasMany(app.model.User, {
+    //   as: 'crew',
+    //   foreignKey: 'dept_id',
+    //   constraints: false,
+    // });
   };
 
   return Dept;

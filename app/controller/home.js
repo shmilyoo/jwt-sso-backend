@@ -11,6 +11,7 @@ class HomeController extends Controller {
     this.ctx.body = { id: generateUUID() };
     this.ctx.logger.info(this.app.config.env);
     this.ctx.logger.info(process.pid);
+    this.ctx.body = this.ctx.helper.getRespBody(true);
   }
   async test() {
     const ctx = this.ctx;

@@ -5,14 +5,17 @@ const jwt = require('jwt-simple');
 
 class AccountController extends Controller {
   async reg() {
-    const ctx = this.ctx;
+    const { ctx, config } = this;
     const body = ctx.request.body;
     let { username, password } = body;
     username = username.toLowerCase();
-    password = await this.service.common.getCryptoPasswd(password, username);
-    await ctx.model.User.create({ username, password });
-    ctx.body = ctx.helper.getRespBody(true, { username });
-    // ctx.body = { success: true, username };
+    if (config.usernameBlackList.includes(username)) {
+      ctx.body = ctx.helper.getRespBody(false, '非法的用户名');
+    } else {
+      password = await this.service.common.getCryptoPasswd(password, username);
+      await ctx.model.User.create({ username, password });
+      ctx.body = ctx.helper.getRespBody(true, { username });
+    }
   }
 
   /**
@@ -28,7 +31,7 @@ class AccountController extends Controller {
   }
 
   /**
-   * 用户首次加载网页，若本地有cookie，则发送认证请求到服务器
+   * //用户首次加载网页，若本地有cookie，则发送认证请求到服务器
    * 暂时取消此方法，相关功能在中间件实现
    */
   async auth() {
@@ -69,9 +72,9 @@ class AccountController extends Controller {
   async updateBasicInfo() {
     const ctx = this.ctx;
     const {
-      birthday: _birthday,
-      married: _married,
-      sex: _sex,
+      birthday,
+      married,
+      sex,
       id_card,
       id_card2,
       name,
@@ -81,9 +84,9 @@ class AccountController extends Controller {
       dept: { id: dept_id },
     } = ctx.request.body;
     const userId = ctx.user.id;
-    const birthday = Number.parseInt(_birthday) || 0;
-    const married = _married === 'true';
-    const sex = Number.parseInt(_sex) || 0;
+    // const birthday = Number.parseInt(_birthday) || 0;
+    // const married = _married === 'true';
+    // const sex = Number.parseInt(_sex) || 0;
     const response = await ctx.model.User.update(
       {
         birthday,
@@ -110,47 +113,58 @@ class AccountController extends Controller {
   async getExp() {
     const ctx = this.ctx;
     const type = ctx.params.type;
-    if (type !== 'work' || type !== 'education') throw '错误的请求类别';
+    if (type !== 'work' && type !== 'education') throw '错误的请求类别';
     const response = await ctx.model.Exp.findAll({
+      attributes: [ 'from', 'to', 'content' ],
       where: { user_id: ctx.user.id, type },
       raw: true,
     });
-    ctx.body = ctx.header.getRespBody(true, response);
+    ctx.body = ctx.helper.getRespBody(true, response);
+  }
+
+  async setExp() {
+    const ctx = this.ctx;
+    const type = ctx.params.type;
+    if (type !== 'work' && type !== 'education') throw '错误的请求类别';
+    const userId = ctx.user.id;
+    const values = ctx.request.body;
+    values.forEach(exp => {
+      exp.type = type;
+      exp.to = exp.to || null;
+      exp.user_id = userId;
+    });
+    const transaction = await ctx.model.transaction();
+    try {
+      await ctx.model.Exp.destroy({
+        where: { user_id: userId, type },
+        transaction,
+      });
+      await ctx.model.Exp.bulkCreate(values, { transaction });
+      await transaction.commit();
+      const newExps = await ctx.model.Exp.findAll({
+        where: { user_id: userId, type },
+        order: [ 'from' ],
+        attributes: [ 'from', 'to', 'content' ],
+        raw: true,
+      });
+      ctx.body = ctx.helper.getRespBody(true, newExps);
+    } catch (error) {
+      await transaction.rollback();
+      ctx.body = ctx.helper.getRespBody(false, `保存失败-${error.message}`);
+    }
   }
 
   async login() {
     const ctx = this.ctx;
     const body = ctx.request.body;
-    let { username, password, remember } = body;
-    remember = remember === 'true'; // qs编码的form格式bodyparser解析boolean为string
+    const { username, password, remember } = body;
+    // remember = remember === 'true'; // qs编码的form格式bodyparser解析boolean为string
     const user = await ctx.service.account.checkUserPasswd(username, password);
     if (user) {
       // 登录认证通过，设置cookie，服务端session
       const [ expires, maxAge ] = ctx.helper.getExpiresAndMaxAge('week', 1);
-      await ctx.app.redis.set(
-        `sso-user-${user.id}`,
-        JSON.stringify({
-          active: user.active,
-          username,
-        }),
-        'ex',
-        remember ? maxAge / 1000 : 3600
-      );
-      ctx.helper.setCookie(
-        'uid',
-        user.id,
-        remember ? { maxAge, expires, httpOnly: true } : { httpOnly: true }
-      );
-      ctx.helper.setCookie(
-        'username',
-        username,
-        remember ? { maxAge, expires } : null
-      );
-      ctx.helper.setCookie(
-        'active',
-        `${user.active}`,
-        remember ? { maxAge, expires } : null
-      );
+      await ctx.server.account.setCache(user, maxAge, remember);
+      await ctx.service.account.setCookie(user, maxAge, expires, remember);
       // todo 修改redis本地缓存信息
       ctx.body = ctx.helper.getRespBody(true, {
         id: user.id,
@@ -160,6 +174,15 @@ class AccountController extends Controller {
     } else {
       ctx.body = ctx.helper.getRespBody(false, '用户名或密码不正确');
     }
+  }
+
+  async logout() {
+    const ctx = this.ctx;
+    await ctx.app.redis.del(`sso-user-${ctx.user.id}`);
+    ctx.helper.setCookie('uid', '');
+    ctx.helper.setCookie('username', '');
+    ctx.helper.setCookie('active', '');
+    ctx.body = ctx.helper.getRespBody(true);
   }
 }
 

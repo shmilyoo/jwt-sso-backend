@@ -21,7 +21,6 @@ module.exports = app => {
         symbol: '1jd',
         name: '思灵不',
         intro: '子节点思灵不',
-        // parent: Array(33).join('0'),
         parent_id: 'c360d5f0ceef11e8b013f53754442dd4',
         path: 'jd-',
         order: 1,
@@ -65,6 +64,7 @@ module.exports = app => {
         dept_id: 'c360d5f0ceef11e8b013f53754442dd4',
       });
       const dddd = await app.model.User.create({
+        id: 'f3762080cb9911e884eec9a890da67bf',
         username: 'dddd',
         password: 'bf535f977eab4e231277e6a24c1fc018',
         name: 'dd滴滴',
@@ -76,8 +76,30 @@ module.exports = app => {
         id_card2: 'card2',
         native_place: '安徽',
         phone: '232343434',
-        active: 1,
+        active: 0,
         dept_id: '0',
+      });
+      const sso1 = await app.model.Sso.create({
+        name: 'ims',
+        symbol: 'ims',
+        code: '111111',
+        origins: 'http://localhost:3000',
+        intro: '办公信息管理系统',
+      });
+      const sso2 = await app.model.Sso.create({
+        name: 'sso2',
+        symbol: 'sso2symbol',
+        code: 'ad97$##@#@#asfd',
+        origins: 'http://localhost:4000;http://localhost:5000',
+        intro: '发的所发生的发生fsdfdsfdsfdsf',
+      });
+      await app.model.UserSso.create({
+        user_id: user1.id,
+        sso_id: sso1.id,
+      });
+      await app.model.UserSso.create({
+        user_id: user1.id,
+        sso_id: sso2.id,
       });
 
       app.logger.info('同步数据库表完毕');

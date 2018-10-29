@@ -13,12 +13,12 @@ module.exports = app => {
     content: { type: STRING(64) }, // 经历内容
   });
 
-  Exp.associate = function() {
-    Exp.belongsTo(app.model.User, {
-      constrains: false,
-      foreignKey: 'user_id',
-    });
-  };
+  // Exp.associate = function() {
+  //   Exp.belongsTo(app.model.User, {
+  //     constrains: false,
+  //     foreignKey: 'user_id',
+  //   });
+  // };
 
   return Exp;
 };

@@ -27,22 +27,29 @@ module.exports = app => {
       foreignKey: 'dept_id',
       constraints: false,
     });
-    User.hasMany(app.model.Exp, {
-      as: 'educations',
-      foreignKey: 'user_id',
+    User.belongsToMany(app.model.Sso, {
+      as: 'ssos',
       constraints: false,
-      scope: {
-        type: 'education',
-      },
-    });
-    User.hasMany(app.model.Exp, {
-      as: 'works',
+      through: app.model.UserSso,
       foreignKey: 'user_id',
-      constraints: false,
-      scope: {
-        type: 'work',
-      },
+      otherKey: 'sso_id',
     });
+    // User.hasMany(app.model.Exp, {
+    //   as: 'educations',
+    //   foreignKey: 'user_id',
+    //   constraints: false,
+    //   scope: {
+    //     type: 'education',
+    //   },
+    // });
+    // User.hasMany(app.model.Exp, {
+    //   as: 'works',
+    //   foreignKey: 'user_id',
+    //   constraints: false,
+    //   scope: {
+    //     type: 'work',
+    //   },
+    // });
   };
 
   return User;

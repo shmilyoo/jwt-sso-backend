@@ -8,7 +8,7 @@ class CommonService extends Service {
    *
    * @param {string} password 用户发送的已经哈希后的密码
    * @param {string} username 用户名
-   * @return {string} 加盐后哈希的密码，生产中应使用更安全的加密方法
+   * @return {string} 存入数据库的加盐后哈希的密码，生产中应使用更安全的加密方法
    */
   async getCryptoPasswd(password, username) {
     const usernameMd5 = crypto

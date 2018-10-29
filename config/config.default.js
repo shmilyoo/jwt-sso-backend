@@ -23,14 +23,18 @@ exports.logger = {
   dir: '/var/log/jwt-sso-backend',
 };
 exports.security = {
+  // domainWhiteList: [ 'http://localhost:3000' ],
   csrf: {
     enable: false,
   },
 };
 exports.cors = {
+  // 对于附带身份凭证的请求(即服务器设置Access-Control-Allow-Credentials: true)，
+  // 服务器不得设置 Access-Control-Allow-Origin 的值为“*”。否则请求将会失败。
   origin: 'http://localhost:3000',
   credentials: true,
   allowMethods: 'GET,POST,PUT,HEAD,DELETE,OPTIONS',
+  maxAge: 3600 * 24,
 };
 exports.onerror = {
   all(err, ctx) {
@@ -38,5 +42,9 @@ exports.onerror = {
     ctx.status = 200;
   },
 };
+exports.cluster = {
+  listen: { port: 8001 },
+};
 exports.jwtSecrect = 'qwert12345yuiop54321';
 exports.salt = 'dsioiwerfdsafsdkl#4343@kfd'; // 用户密码加盐 md5(md5-password+salt)
+exports.usernameBlackList = [ 'admin' ]; // 不允许注册的用户名
