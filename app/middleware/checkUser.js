@@ -5,7 +5,7 @@ module.exports = (options, app) => {
     const id = ctx.helper.getCookie('uid');
     const username = ctx.helper.getCookie('username');
     const active = Number.parseInt(ctx.helper.getCookie('active'));
-    const authInfo = JSON.parse(await app.redis.get(`sso-user-${id}`));
+    const authInfo = JSON.parse(await app.redis.get(`sso:user:${id}`));
     if (
       authInfo &&
       authInfo.username === username &&

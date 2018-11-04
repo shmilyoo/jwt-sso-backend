@@ -6,7 +6,6 @@ module.exports = app => {
     app.beforeStart(async () => {
       app.logger.info('开始同步数据库表');
       await app.model.sync({ force: true });
-
       const deptRoot = await app.model.Dept.create({
         id: 'c360d5f0ceef11e8b013f53754442dd4',
         symbol: 'jd',

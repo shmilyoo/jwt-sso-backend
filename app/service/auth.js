@@ -6,10 +6,9 @@ const util = require('util');
 
 class AuthService extends Service {
   async checkAuthToken(key, token) {
-    const verify = util.promisify(jwt.verify);
     try {
-      await verify(token, key);
-      return true;
+      const data = jwt.verify(token, key);
+      return data;
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         return 'token已经过期，请从原系统重新进入';
@@ -17,6 +16,23 @@ class AuthService extends Service {
       if (error instanceof jwt.JsonWebTokenError) return 'token不正确';
       return `token验证发生未知错误，error:${error}`;
     }
+  }
+
+  async checkCacheSso(userId, symbol) {
+    const cacheStr = await this.ctx.app.redis.get(`sso:user:${userId}`);
+    if (!cacheStr) return false;
+    const cache = JSON.parse(cacheStr);
+    if (cache && cache.auth && cache.auth.includes(symbol)) return true;
+    return false;
+  }
+
+  getAuthTokenSync() {
+    const ctx = this.ctx;
+    const authInHeaders = ctx.request.headers.authorization;
+    const _token = authInHeaders
+      ? authInHeaders.split(' ')[1]
+      : ctx.request.body.token;
+    return _token;
   }
 
   async getUserWithAuth(username, password, sso_id) {
@@ -35,6 +51,14 @@ class AuthService extends Service {
       where: { username, password },
     });
     return user;
+  }
+
+  async getUserBinds(user_id) {
+    const userBinds = await this.ctx.model.UserBind.findAll({
+      where: { user_id },
+      raw: true,
+    });
+    return userBinds;
   }
 }
 

@@ -7,10 +7,11 @@ module.exports = app => {
   const { router, controller } = app;
   const checkUser = app.middleware.checkUser(null, app);
   const checkAdmin = app.middleware.checkAdmin(null, app);
+  const checkSso = app.middleware.checkSso(null, app);
 
   router.get('/', controller.home.index);
-  router.get('/account/info', controller.home.index);
   router.get('/test', controller.home.test);
+  router.get('/account/info', controller.home.index);
   router.get('/account/check/:username', controller.account.checkUser);
   router.get('/account/info/basic', checkUser, controller.account.basicInfo);
   router.post(
@@ -20,7 +21,7 @@ module.exports = app => {
   );
   router.get('/account/info/exp/:type', checkUser, controller.account.getExp);
   router.post('/account/info/exp/:type', checkUser, controller.account.setExp);
-  // router.get('/account/auth', controller.account.auth);
+  router.post('/account/auth', checkUser, controller.account.auth);
   router.post('/account/login', controller.account.login);
   router.post('/account/logout', checkUser, controller.account.logout);
   router.post('/account/reg', controller.account.reg);
@@ -36,4 +37,13 @@ module.exports = app => {
   router.post('/sso/update', checkAdmin, controller.sso.updateSso);
   router.post('/sso/delete', checkAdmin, controller.sso.deleteSso);
   router.post('/auth/login', controller.auth.login);
+  router.post('/auth/check', checkSso, controller.auth.check);
+  router.post('/auth/user/bind', checkSso, controller.auth.userBind);
+  router.post('/auth/check/bind', checkSso, controller.auth.checkBind);
+  router.get('/auth/user/binds', checkUser, controller.auth.userBinds);
+  router.post(
+    '/auth/user/bind/toggle',
+    checkUser,
+    controller.auth.toggleUserBind
+  );
 };

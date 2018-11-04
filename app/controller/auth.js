@@ -14,7 +14,7 @@ class AuthController extends Controller {
       redirect,
       token,
     } = ctx.request.body;
-    const sso = await this.service.sso.getSsoFromSymbol(from);
+    const sso = await this.service.sso.getSsoBySymbol(from);
     if (!sso) {
       ctx.body = ctx.helper.getRespBody(
         false,
@@ -23,17 +23,12 @@ class AuthController extends Controller {
     }
     // 成功返回true，失败返回error message
     const check = await this.service.auth.checkAuthToken(sso.code, token);
-    if (check !== true) {
+    if (typeof check === 'string') {
       // 验证token失败
       ctx.body = ctx.helper.getRespBody(false, check);
       return;
     }
-    // sso第三方系统存在，token有效，继续验证用户登录，并增加用户验证授权表的相关行
-    const user = await ctx.service.auth.getUserWithAuth(
-      username,
-      password,
-      sso.id
-    );
+    const user = await ctx.service.account.checkUserPasswd(username, password);
     if (!user) {
       ctx.body = ctx.helper.getRespBody(false, '用户名密码不正确');
       return;
@@ -42,15 +37,6 @@ class AuthController extends Controller {
       ctx.body = ctx.helper.getRespBody(false, '用户没有激活或被禁用');
       return;
     }
-    if (user.ssos.length === 0) {
-      // 此用户尚未对此第三方系统授权，在此增加授权表条目
-      await ctx.model.UserSso.create({
-        user_id: user.id,
-        sso_id: sso.id,
-      });
-      // user.ssos.push(sso);
-    }
-    // 更新缓存，更新cookie
     const [ expires, maxAge ] = ctx.helper.getExpiresAndMaxAge('week', 1);
     await ctx.service.account.setCache(user, maxAge, remember, sso.symbol);
     await ctx.service.account.setCookie(user, maxAge, expires, remember);
@@ -58,16 +44,162 @@ class AuthController extends Controller {
       {
         exp: Math.floor(Date.now() / 1000) + 15,
         authType: 'sso',
-        user: { id: user.id, active: user.active },
+        user: {
+          id: user.id,
+          active: user.active,
+          sex: user.sex,
+          dept_id: user.dept_id,
+          name: user.name,
+        },
         remember,
       },
       sso.code
     );
-    // location用来302重定向，redirect用来保留url query
     ctx.body = ctx.helper.getRespBody(true, {
       token: tokenReply,
       redirect,
+      id: user.id,
+      active: user.active,
     });
+  }
+
+  /**
+   * 第三方系统用户首次加载页面时，若有cookie，则其服务端发送给sso进行验证
+   */
+  async check() {
+    const ctx = this.ctx;
+    // { id, authType, symbol: sysName },
+    const { id, authType } = ctx.request.body;
+    const sso = ctx.sso;
+    let user = null;
+    if (authType === 'sso') {
+      // 统一认证登录，验证cache
+      if (await ctx.service.auth.checkCacheSso(id, sso.symbol)) {
+        user = await ctx.model.User.findOne({
+          where: { id },
+          raw: true,
+          attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+        });
+      } else {
+        ctx.body = ctx.helper.getRespBody(false, '统一认证系统验证失败');
+        return;
+      }
+    } else if (authType === 'local') {
+      const userBind = await ctx.model.UserBind.findOne({
+        include: [
+          {
+            model: ctx.model.User,
+            as: 'user',
+            attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+          },
+        ],
+        where: { user_id: id, sso_symbol: sso.symbol },
+      });
+      if (userBind && !userBind.agreed) {
+        ctx.body = ctx.helper.getRespBody(false, '统一认证系统未确定用户绑定');
+        return;
+      }
+      if (!userBind) {
+        ctx.body = ctx.helper.getRespBody(false, '统一认证系统不存在绑定关系');
+        return;
+      }
+      user = userBind.user;
+    } else {
+      throw '错误的验证类型';
+    }
+    if (user.active) {
+      // active为0为正常
+      ctx.body = ctx.helper.getRespBody(false, '用户被禁用或者未激活');
+      return;
+    }
+    user.id = id;
+    ctx.body = ctx.helper.getRespBody(true, { authType, user });
+  }
+
+  /**
+   * 第三方系统注册用户，申请绑定sso用户
+   */
+  async userBind() {
+    // sysName: config.sysName,
+    // casUsername: casUsername, // 需要绑定的cas用户名
+    // username: username, // 第三方系统的用户名
+
+    // user_id: { type: CHAR(32), unique: 'userBindUnique' },
+    // sso_symbol: { type: CHAR(16), unique: 'userBindUnique' }, // 系统symbol,对应sso表
+    // // sys_user_id: { type: CHAR(32) }, // 系统对应user的id，用于系统注册用户绑定sso用户
+    // sso_username: { type: STRING(16) }, // 系统的用户名
+    // agreed: { type: BOOLEAN, defaultValue: false }, // sso 系统用户是否已经同意授权绑定
+    const ctx = this.ctx;
+    const { sysName, casUsername, username } = ctx.request.body;
+    const user = await ctx.model.User.findOne({
+      where: { username: casUsername },
+      include: [
+        {
+          as: 'binds',
+          model: ctx.model.UserBind,
+          where: { sso_symbol: sysName },
+          required: false,
+        },
+      ],
+    });
+    if (!user) {
+      ctx.body = ctx.helper.getRespBody(false, '统一认证系统用户名不存在');
+      return;
+    }
+    if (user.binds.length > 0) {
+      ctx.body = ctx.helper.getRespBody(
+        false,
+        '统一认证系统用户和本系统已经存在绑定关系'
+      );
+      return;
+    }
+    await ctx.model.UserBind.create({
+      user_id: user.id,
+      sso_symbol: sysName,
+      sso_username: username,
+    });
+    ctx.body = ctx.helper.getRespBody(true, { id: user.id });
+  }
+
+  async userBinds() {
+    const ctx = this.ctx;
+    const userBinds = await ctx.service.auth.getUserBinds(ctx.user.id);
+    ctx.body = ctx.helper.getRespBody(true, userBinds);
+  }
+
+  async toggleUserBind() {
+    const ctx = this.ctx;
+    const { id, agreed } = ctx.request.body;
+    if (agreed) {
+      // 对于已经同意的，撤销申请，直接删除条目
+      await ctx.model.UserBind.destroy({ where: { id } });
+    } else {
+      // 对于未同意的，同意申请
+      await ctx.model.UserBind.update({ agreed: true }, { where: { id } });
+    }
+    const userBinds = await ctx.service.auth.getUserBinds(ctx.user.id);
+    ctx.body = ctx.helper.getRespBody(true, userBinds);
+  }
+
+  async checkBind() {
+    const ctx = this.ctx;
+    const { user_id, sso_username } = ctx.request.body;
+    const sso_symbol = ctx.sso.symbol;
+    const userBind = await ctx.model.UserBind.findOne({
+      where: { user_id, sso_username, sso_symbol },
+    });
+    if (!userBind) {
+      ctx.body = ctx.helper.getRespBody(false, '尚未绑定统一认证系统用户');
+    } else {
+      if (!userBind.agreed) {
+        ctx.body = ctx.helper.getRespBody(
+          false,
+          '统一认证系统用户尚未确认绑定'
+        );
+      } else {
+        ctx.body = ctx.helper.getRespBody(true);
+      }
+    }
   }
 }
 

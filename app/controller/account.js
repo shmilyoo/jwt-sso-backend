@@ -35,27 +35,9 @@ class AccountController extends Controller {
    * 暂时取消此方法，相关功能在中间件实现
    */
   async auth() {
+    // 已经经过中间件checkUser验证，直接返回true即可
     const ctx = this.ctx;
-    // 获取client的cookie uid user active,根据uid获取redis中设置，与user和active比较
-    // 若一致则返回正常，不一致则返回未授权并清空客户端cookie
-    const id = ctx.helper.getCookie('uid');
-    const username = ctx.helper.getCookie('username');
-    const active = Number.parseInt(ctx.helper.getCookie('active'));
-    const authInfo = JSON.parse(await ctx.app.redis.get(`sso-user-${id}`));
-    if (
-      authInfo &&
-      authInfo.username === username &&
-      authInfo.active === active
-    ) {
-      ctx.body = ctx.helper.getRespBody(true);
-    } else {
-      // 验证失败，清除cookie，返回401错误
-      ctx.helper.setCookie('uid', '');
-      ctx.helper.setCookie('username', '');
-      ctx.helper.setCookie('active', '');
-      ctx.status = 401;
-      ctx.body = ctx.helper.getRespBody(false, '用户认证失败');
-    }
+    ctx.body = ctx.helper.getRespBody(true, ctx.user);
   }
 
   async basicInfo() {
@@ -163,7 +145,7 @@ class AccountController extends Controller {
     if (user) {
       // 登录认证通过，设置cookie，服务端session
       const [ expires, maxAge ] = ctx.helper.getExpiresAndMaxAge('week', 1);
-      await ctx.server.account.setCache(user, maxAge, remember);
+      await ctx.service.account.setCache(user, maxAge, remember);
       await ctx.service.account.setCookie(user, maxAge, expires, remember);
       // todo 修改redis本地缓存信息
       ctx.body = ctx.helper.getRespBody(true, {
@@ -178,7 +160,7 @@ class AccountController extends Controller {
 
   async logout() {
     const ctx = this.ctx;
-    await ctx.app.redis.del(`sso-user-${ctx.user.id}`);
+    await ctx.app.redis.del(`sso:user:${ctx.user.id}`);
     ctx.helper.setCookie('uid', '');
     ctx.helper.setCookie('username', '');
     ctx.helper.setCookie('active', '');

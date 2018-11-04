@@ -6,13 +6,7 @@ class AccountService extends Service {
   async checkUserPasswd(username, password) {
     username = username.toLowerCase();
     password = await this.service.common.getCryptoPasswd(password, username);
-    // await new Promise(resolve => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 1000);
-    // });
     const user = await this.ctx.model.User.findOne({
-      attributes: [ 'id', 'username', 'password', 'active' ],
       where: { username, password },
     });
     return user;
@@ -64,7 +58,7 @@ class AccountService extends Service {
    * @param {string} ssoSymbol 第三方系统的符号
    */
   async setCache(user, maxAge, remember, ssoSymbol) {
-    const userId = `sso-user-${user.id}`;
+    const userId = `sso:user:${user.id}`;
     const cacheStr = await this.ctx.app.redis.get(userId);
     const cache = JSON.parse(cacheStr) || {};
     cache.username = user.username;

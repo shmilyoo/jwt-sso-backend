@@ -34,6 +34,11 @@ module.exports = app => {
       foreignKey: 'user_id',
       otherKey: 'sso_id',
     });
+    User.hasMany(app.model.UserBind, {
+      as: 'binds',
+      foreignKey: 'user_id',
+      constraints: false,
+    });
     // User.hasMany(app.model.Exp, {
     //   as: 'educations',
     //   foreignKey: 'user_id',
