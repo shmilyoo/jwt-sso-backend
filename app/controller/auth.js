@@ -186,6 +186,13 @@ class AuthController extends Controller {
     const { user_id, sso_username } = ctx.request.body;
     const sso_symbol = ctx.sso.symbol;
     const userBind = await ctx.model.UserBind.findOne({
+      include: [
+        {
+          model: ctx.model.User,
+          as: 'user',
+          attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+        },
+      ],
       where: { user_id, sso_username, sso_symbol },
     });
     if (!userBind) {
@@ -197,7 +204,7 @@ class AuthController extends Controller {
           '统一认证系统用户尚未确认绑定'
         );
       } else {
-        ctx.body = ctx.helper.getRespBody(true);
+        ctx.body = ctx.helper.getRespBody(true, userBind);
       }
     }
   }
