@@ -31,6 +31,7 @@ class DeptController extends Controller {
       { where: { id } }
     );
     if (result.length && result[0]) {
+      await ctx.service.dept.refreshDeptUpdateTime();
       ctx.body = ctx.helper.getRespBody(true, result[0]);
     } else {
       ctx.body = ctx.helper.getRespBody(false, '更新失败,');
@@ -44,7 +45,11 @@ class DeptController extends Controller {
     const result = await ctx.model.Dept.destroy({
       where: { id: { [ctx.model.Op.in]: idList } },
     });
-    ctx.body = ctx.helper.getRespBody(true, result);
+    result && (await ctx.service.dept.refreshDeptUpdateTime());
+    ctx.body = ctx.helper.getRespBody(
+      !!result,
+      result ? result : '没有删除任何条目'
+    );
   }
 
   async moveDept() {
@@ -78,11 +83,6 @@ class DeptController extends Controller {
     const ctx = this.ctx;
     const symbol = ctx.params.symbol;
     const count = await ctx.model.Dept.count({ where: { symbol } });
-    await new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    });
     ctx.body = ctx.helper.getRespBody(true, count);
   }
 }

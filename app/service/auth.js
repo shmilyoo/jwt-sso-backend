@@ -53,9 +53,9 @@ class AuthService extends Service {
     return user;
   }
 
-  async getUserBinds(user_id) {
+  async getUserBinds(userId) {
     const userBinds = await this.ctx.model.UserBind.findAll({
-      where: { user_id },
+      where: { userId },
       raw: true,
     });
     return userBinds;

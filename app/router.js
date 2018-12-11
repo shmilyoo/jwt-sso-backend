@@ -19,8 +19,8 @@ module.exports = app => {
     checkUser,
     controller.account.updateBasicInfo
   );
-  router.get('/account/info/exp/:type', checkUser, controller.account.getExp);
-  router.post('/account/info/exp/:type', checkUser, controller.account.setExp);
+  router.get('/account/info/exp/:kind', checkUser, controller.account.getExp);
+  router.post('/account/info/exp/:kind', checkUser, controller.account.setExp);
   router.post('/account/auth', checkUser, controller.account.auth);
   router.post('/account/login', controller.account.login);
   router.post('/account/logout', checkUser, controller.account.logout);
@@ -40,10 +40,13 @@ module.exports = app => {
   router.post('/auth/check', checkSso, controller.auth.check);
   router.post('/auth/user/bind', checkSso, controller.auth.userBind);
   router.post('/auth/check/bind', checkSso, controller.auth.checkBind);
-  router.get('/auth/user/binds', checkUser, controller.auth.userBinds);
+  router.get('/auth/user/binds', checkUser, controller.auth.userBinds); // 本地获取用户绑定列表
   router.post(
     '/auth/user/bind/toggle',
     checkUser,
     controller.auth.toggleUserBind
-  );
+  ); // 本地用户变更绑定，允许或拒绝
+  // '/sso-api/depts?time=unix时间戳',若time和system表中deptUpdateTime一致，
+  // 则返回data为{hasChanged:false},其他则返回{hasChanged:true,deptArray,time}
+  router.get('/sso-api/depts', checkSso, controller.api.deptArray);
 };

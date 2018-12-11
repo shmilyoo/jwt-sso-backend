@@ -13,9 +13,7 @@ module.exports = app => {
     name: { type: STRING }, // 系统名称
     symbol: { type: STRING(16), unique: true }, // 系统代号，数字字母
     code: { type: STRING(16) }, // 认证密码
-    // origins: { type: STRING }, // 来源ip:port;ip:port... 组
     intro: { type: STRING, allowNull: true }, // 系统介绍
-    // update_dept_api: { type: STRING, allowNull: true }, // 在dept更新时，可以主动给其他用户系统发送更新数据
   });
 
   return Sso;

@@ -19,34 +19,34 @@ class AccountService extends Service {
         'name',
         'sex',
         'birthday',
-        'dept_id',
+        'deptId',
         'nation',
-        'id_card',
-        'id_card2',
-        'native_place',
+        'idCard',
+        'idCard2',
+        'nativePlace',
         'phone',
         'married',
       ],
       raw: true,
     });
     if (!user) return null;
-    const dept_id = user.dept_id;
-    if (dept_id === '0') {
+    const deptId = user.deptId;
+    if (deptId === '0') {
       // 用户初始化后未设置dept，默认为0
       user.dept = null;
     } else {
-      const depts = await this.service.dept.getDeptWithAncestor(dept_id);
+      const depts = await this.service.dept.getDeptWithAncestor(deptId);
       const names = [];
       depts.forEach(dept => {
         names.push(dept.name);
       });
       user.dept = {
-        id: dept_id,
+        id: deptId,
         names: names.join('-'),
         name: names[names.length - 1],
       };
     }
-    delete user.dept_id;
+    delete user.deptId;
     return user;
   }
 

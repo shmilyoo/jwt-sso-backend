@@ -18,7 +18,11 @@ class HomeController extends Controller {
     const result = await ctx.model.Dept.destroy({
       where: { id: 'c360d5f0ceef11e8b013f53754442dd4' },
     });
-    ctx.body = ctx.helper.getRespBody(true, result);
+    result && (await ctx.service.dept.refreshDeptUpdateTime());
+    ctx.body = ctx.helper.getRespBody(
+      !!result,
+      result ? result : '没有删除条目'
+    );
   }
 }
 

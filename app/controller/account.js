@@ -57,30 +57,27 @@ class AccountController extends Controller {
       birthday,
       married,
       sex,
-      id_card,
-      id_card2,
+      idCard,
+      idCard2,
       name,
       nation,
-      native_place,
+      nativePlace,
       phone,
-      dept: { id: dept_id },
+      dept: { id: deptId },
     } = ctx.request.body;
     const userId = ctx.user.id;
-    // const birthday = Number.parseInt(_birthday) || 0;
-    // const married = _married === 'true';
-    // const sex = Number.parseInt(_sex) || 0;
     const response = await ctx.model.User.update(
       {
         birthday,
         married,
         sex,
-        id_card,
-        id_card2,
+        idCard,
+        idCard2,
         name,
         nation,
-        native_place,
+        nativePlace,
         phone,
-        dept_id,
+        deptId,
         active: 0, // 未激活用户在完善基本信息后完成激活
       },
       { where: { id: userId } }
@@ -94,40 +91,40 @@ class AccountController extends Controller {
 
   async getExp() {
     const ctx = this.ctx;
-    const type = ctx.params.type;
-    if (type !== 'work' && type !== 'education') throw '错误的请求类别';
-    const response = await ctx.model.Exp.findAll({
-      attributes: [ 'from', 'to', 'content' ],
-      where: { user_id: ctx.user.id, type },
-      raw: true,
+    const kind = ctx.params.kind;
+    let model = null;
+    if (kind === 'work') model = ctx.model.WorkExp;
+    else if (kind === 'edu') model = ctx.model.EduExp;
+    else throw '不存在的经验类型';
+    const response = await model.findAll({
+      where: { userId: ctx.user.id },
     });
     ctx.body = ctx.helper.getRespBody(true, response);
   }
-
   async setExp() {
     const ctx = this.ctx;
-    const type = ctx.params.type;
-    if (type !== 'work' && type !== 'education') throw '错误的请求类别';
+    const kind = ctx.params.kind;
+    let model = null;
+    if (kind === 'work') model = ctx.model.WorkExp;
+    else if (kind === 'edu') model = ctx.model.EduExp;
+    else throw '不存在的经验类型';
     const userId = ctx.user.id;
     const values = ctx.request.body;
     values.forEach(exp => {
-      exp.type = type;
       exp.to = exp.to || null;
-      exp.user_id = userId;
+      exp.userId = userId;
     });
     const transaction = await ctx.model.transaction();
     try {
-      await ctx.model.Exp.destroy({
-        where: { user_id: userId, type },
+      await model.destroy({
+        where: { userId },
         transaction,
       });
-      await ctx.model.Exp.bulkCreate(values, { transaction });
+      await model.bulkCreate(values, { transaction });
       await transaction.commit();
-      const newExps = await ctx.model.Exp.findAll({
-        where: { user_id: userId, type },
+      const newExps = await model.findAll({
+        where: { userId },
         order: [ 'from' ],
-        attributes: [ 'from', 'to', 'content' ],
-        raw: true,
       });
       ctx.body = ctx.helper.getRespBody(true, newExps);
     } catch (error) {

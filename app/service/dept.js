@@ -8,11 +8,6 @@ class DeptService extends Service {
       order: [ 'level', 'order' ],
       raw: true,
     });
-    // await new Promise(resolve => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 500);
-    // });
     return depts;
   }
 
@@ -50,11 +45,12 @@ class DeptService extends Service {
       name,
       intro,
       symbol,
-      parent_id: parentId,
+      parentId,
       path,
       order,
       level,
     });
+    dept && (await this.refreshDeptUpdateTime());
     return dept;
   }
 
@@ -87,12 +83,12 @@ class DeptService extends Service {
         // 在新的同级别dept中在第一位，将所有其他同级别node的order+1
         await Dept.update(
           { order: ctx.model.literal('`order` +1') },
-          { where: { parent_id: parentId }, transaction }
+          { where: { parentId }, transaction }
         );
         // 将新的node设置为order 1,以及自己的新parent
         await Dept.update(
           {
-            parent_id: parentId,
+            parentId,
             order: 1,
             level: parent.level + 1,
             path: parent.newNodePath,
@@ -111,7 +107,7 @@ class DeptService extends Service {
           { order: ctx.model.literal('`order`+1') },
           {
             where: {
-              parent_id: parentId,
+              parentId,
               order: { [ctx.model.Op.gt]: preDept.order },
             },
             transaction,
@@ -120,7 +116,7 @@ class DeptService extends Service {
         // 设置自己order为前一个node的order+1，以及自己的新parent
         await Dept.update(
           {
-            parent_id: parentId,
+            parentId,
             order: preDept.order + 1,
             level: parent.level + 1,
             path: parent.newNodePath,
@@ -143,6 +139,7 @@ class DeptService extends Service {
           transaction,
         }
       );
+      await this.refreshDeptUpdateTime();
       await transaction.commit();
     } catch (error) {
       await transaction.rollback();
@@ -242,6 +239,13 @@ class DeptService extends Service {
       raw: true,
     });
     return [ dept, ...depts ];
+  }
+
+  async refreshDeptUpdateTime() {
+    await this.ctx.model.System.upsert({
+      name: 'deptUpdateTimeStr',
+      value: `${Math.floor(new Date().getTime() / 1000)}`,
+    });
   }
 }
 

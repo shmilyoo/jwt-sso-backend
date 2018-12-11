@@ -48,7 +48,7 @@ class AuthController extends Controller {
           id: user.id,
           active: user.active,
           sex: user.sex,
-          dept_id: user.dept_id,
+          deptId: user.deptId,
           name: user.name,
         },
         remember,
@@ -78,7 +78,7 @@ class AuthController extends Controller {
         user = await ctx.model.User.findOne({
           where: { id },
           raw: true,
-          attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+          attributes: [ 'username', 'active', 'name', 'sex', 'deptId' ],
         });
       } else {
         ctx.body = ctx.helper.getRespBody(false, '统一认证系统验证失败');
@@ -90,10 +90,10 @@ class AuthController extends Controller {
           {
             model: ctx.model.User,
             as: 'user',
-            attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+            attributes: [ 'username', 'active', 'name', 'sex', 'deptId' ],
           },
         ],
-        where: { user_id: id, sso_symbol: sso.symbol },
+        where: { userId: id, ssoSymbol: sso.symbol },
       });
       if (userBind && !userBind.agreed) {
         ctx.body = ctx.helper.getRespBody(false, '统一认证系统未确定用户绑定');
@@ -124,10 +124,9 @@ class AuthController extends Controller {
     // casUsername: casUsername, // 需要绑定的cas用户名
     // username: username, // 第三方系统的用户名
 
-    // user_id: { type: CHAR(32), unique: 'userBindUnique' },
-    // sso_symbol: { type: CHAR(16), unique: 'userBindUnique' }, // 系统symbol,对应sso表
-    // // sys_user_id: { type: CHAR(32) }, // 系统对应user的id，用于系统注册用户绑定sso用户
-    // sso_username: { type: STRING(16) }, // 系统的用户名
+    // userId: { type: CHAR(32), unique: 'userBindUnique' },
+    // ssoSymbol: { type: CHAR(16), unique: 'userBindUnique' }, // 系统symbol,对应sso表
+    // ssoUsername: { type: STRING(16) }, // 系统的用户名
     // agreed: { type: BOOLEAN, defaultValue: false }, // sso 系统用户是否已经同意授权绑定
     const ctx = this.ctx;
     const { sysName, casUsername, username } = ctx.request.body;
@@ -137,7 +136,7 @@ class AuthController extends Controller {
         {
           as: 'binds',
           model: ctx.model.UserBind,
-          where: { sso_symbol: sysName },
+          where: { ssoSymbol: sysName },
           required: false,
         },
       ],
@@ -154,11 +153,15 @@ class AuthController extends Controller {
       return;
     }
     await ctx.model.UserBind.create({
-      user_id: user.id,
-      sso_symbol: sysName,
-      sso_username: username,
+      userId: user.id,
+      ssoSymbol: sysName,
+      ssoUsername: username,
     });
-    ctx.body = ctx.helper.getRespBody(true, { id: user.id });
+    ctx.body = ctx.helper.getRespBody(true, {
+      id: user.id,
+      name: user.name,
+      deptId: user.deptId,
+    });
   }
 
   async userBinds() {
@@ -183,17 +186,17 @@ class AuthController extends Controller {
 
   async checkBind() {
     const ctx = this.ctx;
-    const { user_id, sso_username } = ctx.request.body;
-    const sso_symbol = ctx.sso.symbol;
+    const { userId, ssoUsername } = ctx.request.body;
+    const ssoSymbol = ctx.sso.symbol;
     const userBind = await ctx.model.UserBind.findOne({
       include: [
         {
           model: ctx.model.User,
           as: 'user',
-          attributes: [ 'username', 'active', 'name', 'sex', 'dept_id' ],
+          attributes: [ 'username', 'active', 'name', 'sex', 'deptId' ],
         },
       ],
-      where: { user_id, sso_username, sso_symbol },
+      where: { userId, ssoUsername, ssoSymbol },
     });
     if (!userBind) {
       ctx.body = ctx.helper.getRespBody(false, '尚未绑定统一认证系统用户');
@@ -202,6 +205,13 @@ class AuthController extends Controller {
         ctx.body = ctx.helper.getRespBody(
           false,
           '统一认证系统用户尚未确认绑定'
+        );
+      } else if (userBind.user.active !== 0) {
+        ctx.body = ctx.helper.getRespBody(
+          false,
+          userBind.user.active === 1
+            ? '统一认证系统用户未激活'
+            : '统一认证系统用户被禁用'
         );
       } else {
         ctx.body = ctx.helper.getRespBody(true, userBind);

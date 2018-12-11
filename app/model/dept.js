@@ -12,7 +12,7 @@ module.exports = app => {
       symbol: { type: STRING(16) }, // 用在path里面，直接用uuid太长了
       name: { type: STRING(32) }, // 部门名称，可重复
       intro: { type: STRING(64), defaultValue: '' }, // 部门简介
-      parent_id: { type: CHAR(32) }, // 父节点id，根节点的父节点为 '0'*32
+      parentId: { type: CHAR(32) }, // 父节点id，根节点的父节点为 '0'*32
       path: { type: STRING }, // 路径，根节点为''，其他节点为`${parent.path}${parent.id}-`
       level: { type: INTEGER }, // 节点深度，根节点为1，以下递增1
       order: { type: INTEGER, defaultValue: 1 }, // 兄弟节点的排序，数字越小越优先
@@ -23,18 +23,18 @@ module.exports = app => {
   Dept.associate = function() {
     Dept.hasMany(Dept, {
       as: 'children',
-      foreignKey: 'parent_id',
+      foreignKey: 'parentId',
       constraints: false,
     });
     Dept.belongsTo(Dept, {
       as: 'parent',
-      foreignKey: 'parent_id',
+      foreignKey: 'parentId',
       targetKey: 'id',
       constraints: false,
     });
     // Dept.hasMany(app.model.User, {
     //   as: 'crew',
-    //   foreignKey: 'dept_id',
+    //   foreignKey: 'deptId',
     //   constraints: false,
     // });
   };
