@@ -243,7 +243,7 @@ class DeptService extends Service {
 
   async refreshDeptUpdateTime() {
     await this.ctx.model.System.upsert({
-      name: 'deptUpdateTimeStr',
+      name: 'deptUpdateTime',
       value: `${Math.floor(new Date().getTime() / 1000)}`,
     });
   }

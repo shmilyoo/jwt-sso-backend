@@ -152,16 +152,23 @@ class AuthController extends Controller {
       );
       return;
     }
-    await ctx.model.UserBind.create({
-      userId: user.id,
-      ssoSymbol: sysName,
-      ssoUsername: username,
-    });
-    ctx.body = ctx.helper.getRespBody(true, {
-      id: user.id,
-      name: user.name,
-      deptId: user.deptId,
-    });
+    try {
+      await ctx.model.UserBind.create({
+        userId: user.id,
+        ssoSymbol: sysName,
+        ssoUsername: username,
+      });
+      ctx.body = ctx.helper.getRespBody(true, {
+        id: user.id,
+        name: user.name,
+        deptId: user.deptId,
+      });
+    } catch (error) {
+      ctx.body = ctx.helper.getRespBody(
+        false,
+        `确保CAS用户${casUsername}与本系统用户不存在绑定关系，且本系统用户${username}在CAS不存在绑定关系`
+      );
+    }
   }
 
   async userBinds() {
